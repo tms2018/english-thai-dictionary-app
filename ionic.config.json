@@ -1,5 +1,7 @@
 {
   "name": "thai-dict-app",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "ionic-angular"
 }
