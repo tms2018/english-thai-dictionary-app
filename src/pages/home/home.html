@@ -5,13 +5,19 @@
 </ion-header>
 
 <ion-content padding>
-  <h2>Welcome to Ionic!</h2>
-  <p>
-    This starter project comes with simple tabs-based layout for apps
-    that are going to primarily use a Tabbed UI.
-  </p>
-  <p>
-    Take a look at the <code>src/pages/</code> directory to add or change tabs,
-    update any existing page or create new pages.
-  </p>
+  <ion-item>
+    <ion-label fixed>Search</ion-label>
+    <ion-input type="text" (change)="find($event.target.value)"></ion-input>
+  </ion-item>
+
+  <ion-list *ngIf="words.length > 0">
+    <ion-item-group *ngFor="let word of words">
+      <ion-item-divider color="light">{{ word.word }} <small>{{ word.pos }}</small></ion-item-divider>
+      <ion-item *ngFor="let definition of word.definitions">
+        <p *ngIf="definition.definition != ''">{{ definition.definition }}</p>
+        <p *ngIf="definition.translation != ''">{{ definition.translation }}</p>
+        <p *ngIf="definition.example != ''">{{ definition.example }}</p>
+      </ion-item>
+    </ion-item-group>
+  </ion-list>
 </ion-content>
