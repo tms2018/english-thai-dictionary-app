@@ -85,6 +85,23 @@ export class DatabaseProvider {
     return { word, pos, definitions };
   }
 
+  async fts(toFind): Promise<any> {
+    const query = `
+      SELECT *
+      FROM english_fts
+      WHERE word
+      MATCH '^${toFind}*'
+      ORDER BY rank
+      LIMIT 30
+    `;
+
+    const res = await this.database.executeSql(query, []);
+    for (let i = 0; i < res.rows.length; i++) {
+      console.log(JSON.stringify(res.rows.item(i)));
+    }
+    return res;
+  }
+
   executeSql(query, args = []) {
     return this.database.executeSql(query, args);
   }
