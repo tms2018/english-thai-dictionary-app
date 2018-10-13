@@ -74,6 +74,14 @@ export class DatabaseProvider {
     return { word, pos, definitions };
   }
 
+  findAll(toFind: String[]): Observable<Promise<Word[]>> {
+    const uniqueWords = Array.from(new Set(toFind));
+
+    return this.ready().map(_ => {
+      return Promise.all(uniqueWords.map(word => this.find(word)));
+    });
+  }
+
   fts(toFind: String): Observable<Promise<Word[]>> {
     const query = `
       SELECT DISTINCT *
