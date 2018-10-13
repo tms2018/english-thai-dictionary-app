@@ -9,41 +9,7 @@ import "rxjs/add/operator/skipWhile";
   templateUrl: "home.html"
 })
 export class HomePage {
-  words: Word[] = [
-    {
-      word: "test",
-      pos: "test",
-      definitions: [
-        {
-          definition: "test",
-          translation: "el testo",
-          example: "test"
-        }
-      ]
-    },
-    {
-      word: "test",
-      pos: "test",
-      definitions: [
-        {
-          definition: "test",
-          translation: "el testo",
-          example: "test"
-        }
-      ]
-    },
-    {
-      word: "test",
-      pos: "test",
-      definitions: [
-        {
-          definition: "test",
-          translation: "el testo",
-          example: "test"
-        }
-      ]
-    }
-  ];
+  words: Word[] = [];
 
   constructor(public navCtrl: NavController, public db: DatabaseProvider) {
     this.find("A");
