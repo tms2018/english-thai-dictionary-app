@@ -3,12 +3,7 @@ import { Platform } from "ionic-angular";
 import { Injectable } from "@angular/core";
 import { SQLite, SQLiteObject } from "@ionic-native/sqlite";
 import { BehaviorSubject, Observable } from "rxjs/Rx";
-/*
-  Generated class for the DatabaseProvider provider.
-
-  See https://angular.io/guide/dependency-injection for more info on providers
-  and Angular DI.
-*/
+import "rxjs/add/operator/skipWhile";
 
 function errorHandler(e) {
   console.error(JSON.stringify(e, Object.getOwnPropertyNames(e)));
@@ -39,10 +34,6 @@ export interface Definition {
   example?: String;
 }
 
-const wordQuery = "SELECT word, pos, word_id FROM words WHERE word = ?;";
-const definitionQuery =
-  "SELECT definition, translation, example FROM definitions WHERE word_id = ?";
-
 @Injectable()
 export class DatabaseProvider {
   database: SQLiteObject;
@@ -50,7 +41,6 @@ export class DatabaseProvider {
 
   constructor(platform: Platform, sqlite: SQLite) {
     this.databaseReady = new BehaviorSubject(false);
-    this.find = this.find.bind(this);
 
     platform.ready().then(_ => {
       sqlite
@@ -84,22 +74,19 @@ export class DatabaseProvider {
     return { word, pos, definitions };
   }
 
-  fts(toFind): Observable<Promise<Word[]>> {
+  fts(toFind: String): Observable<Promise<Word[]>> {
     const query = `
-      SELECT *
+      SELECT DISTINCT *
       FROM english_fts
       WHERE word
-      MATCH '^${toFind}*'
+      MATCH ?
       ORDER BY rank
       LIMIT 20
     `;
 
     return this.ready().map(async _ => {
-      const res = await this.database.executeSql(query, []);
-
-      const words: String[] = this.extractQueryResults(res).map(
-        val => val.word
-      );
+      const res = await this.database.executeSql(query, [`^${toFind}*`]);
+      let words: String[] = this.extractQueryResults(res).map(val => val.word);
       return Promise.all(words.map(word => this.find(word)));
     });
   }
