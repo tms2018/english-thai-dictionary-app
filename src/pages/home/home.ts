@@ -16,13 +16,10 @@ export class HomePage {
   }
 
   find(word) {
-    this.db
-      .ready()
-      .skipWhile(val => !val)
-      .subscribe(_ => {
-        Observable.fromPromise(this.db.fts(word)).subscribe(matches => {
-          this.words = matches.filter(val => val !== null);
-        });
+    this.db.fts(word).subscribe(res => {
+      res.then(matches => {
+        this.words = matches.filter(val => val !== null);
       });
+    });
   }
 }
