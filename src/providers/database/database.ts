@@ -75,10 +75,9 @@ export class DatabaseProvider {
     if (wordRes.rows.length === 0) return null;
 
     const { word, pos, word_id }: WordRecord = wordRes.rows.item(0);
-    // TODO: convert word_id column on definitions table to int instead of text
     const defRes = await this.database.executeSql(
       "SELECT definition, translation, example FROM definitions WHERE word_id = ?",
-      [`${word_id}.0`]
+      [word_id]
     );
 
     const definitions: Definition[] = this.extractQueryResults(defRes);
@@ -103,15 +102,6 @@ export class DatabaseProvider {
       );
       return Promise.all(words.map(word => this.find(word)));
     });
-    //   .subscribe(_ =>
-    //   Observable.fromPromise(this.db.fts(word)).subscribe(matches => {
-    //     this.words = matches.filter(val => val !== null);
-    //   });
-    // });
-    // const res = await this.database.executeSql(query, []);
-
-    // const words: String[] = this.extractQueryResults(res).map(val => val.word);
-    // return Promise.all(words.map(word => this.find(word)));
   }
 
   executeSql(query, args = []) {
