@@ -7,5 +7,15 @@
 </ion-header>
 
 <ion-content padding>
-  <h2>Hi</h2>
+
+  <ion-list *ngIf="words.length > 0">
+    <ion-item-group *ngFor="let word of words">
+      <ion-item-divider color="light"><b>{{ word.word }}</b> <small>{{ word.pos }}</small></ion-item-divider>
+      <ion-item text-wrap *ngFor="let definition of word.definitions">
+        <p *ngIf="definition.translation != ''"><b>{{ definition.translation }}</b></p>
+        <p *ngIf="definition.definition != ''">{{ definition.definition }}</p>
+        <p *ngIf="definition.example != ''"><em>{{ definition.example }}</em></p>
+      </ion-item>
+    </ion-item-group>
+  </ion-list>
 </ion-content>
