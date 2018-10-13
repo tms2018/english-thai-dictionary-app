@@ -57,24 +57,33 @@ export class DatabaseProvider {
     });
   }
 
-  async find(toFind): Promise<Word> {
+  async find(toFind): Promise<Word[]> {
     const wordRes = await this.database.executeSql(
       "SELECT * FROM words WHERE word = ?;",
       [toFind]
     );
     if (wordRes.rows.length === 0) return null;
 
-    const { word, pos, word_id }: WordRecord = wordRes.rows.item(0);
-    const defRes = await this.database.executeSql(
-      "SELECT definition, translation, example FROM definitions WHERE word_id = ?",
-      [word_id]
-    );
+    const allWords = this.extractQueryResults(wordRes);
 
-    const definitions: Definition[] = this.extractQueryResults(defRes);
-    return { word, pos, definitions };
+    return Promise.all(
+      allWords.map(async word => {
+        const defRes = await this.database.executeSql(
+          "SELECT definition, translation, example FROM definitions WHERE word_id = ?",
+          [word.word_id]
+        );
+
+        const val = {
+          word: word.word,
+          pos: word.pos,
+          definitions: this.extractQueryResults(defRes)
+        };
+        return val;
+      })
+    );
   }
 
-  findAll(toFind: String[]): Observable<Promise<Word[]>> {
+  findAll(toFind: String[]): Observable<Promise<Word[][]>> {
     const uniqueWords = Array.from(new Set(toFind));
 
     return this.ready().map(_ => {
@@ -82,7 +91,7 @@ export class DatabaseProvider {
     });
   }
 
-  fts(toFind: String): Observable<Promise<Word[]>> {
+  fts(toFind: String): Observable<Promise<Word[][]>> {
     const query = `
       SELECT DISTINCT *
       FROM english_fts
