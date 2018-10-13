@@ -39,6 +39,10 @@ export interface Definition {
   example?: String;
 }
 
+const wordQuery = "SELECT word, pos, word_id FROM words WHERE word = ?;";
+const definitionQuery =
+  "SELECT definition, translation, example FROM definitions WHERE word_id = ?";
+
 @Injectable()
 export class DatabaseProvider {
   database: SQLiteObject;
@@ -46,6 +50,7 @@ export class DatabaseProvider {
 
   constructor(platform: Platform, sqlite: SQLite) {
     this.databaseReady = new BehaviorSubject(false);
+    this.find = this.find.bind(this);
 
     platform.ready().then(_ => {
       sqlite
@@ -65,41 +70,34 @@ export class DatabaseProvider {
   async find(toFind): Promise<Word> {
     const wordRes = await this.database.executeSql(
       "SELECT * FROM words WHERE word = ?;",
-      [toFind.toLowerCase()]
+      [toFind]
     );
+    if (wordRes.rows.length === 0) return null;
 
-    if (wordRes.rows.length == 0) return undefined;
     const { word, pos, word_id }: WordRecord = wordRes.rows.item(0);
     const defRes = await this.database.executeSql(
       "SELECT definition, translation, example FROM definitions WHERE word_id = ?",
       [word_id]
     );
 
-    console.log(defRes.rows.length);
-    const definitions: Definition[] = [];
-    for (let i = 0; i < defRes.rows.length; i++) {
-      console.log(defRes.rows.item(i));
-      definitions.push(defRes.rows.item(i));
-    }
-
+    const definitions: Definition[] = this.extractQueryResults(defRes);
     return { word, pos, definitions };
   }
 
-  async fts(toFind): Promise<any> {
+  async fts(toFind): Promise<Word[]> {
     const query = `
       SELECT *
       FROM english_fts
       WHERE word
       MATCH '^${toFind}*'
       ORDER BY rank
-      LIMIT 30
+      LIMIT 20
     `;
 
     const res = await this.database.executeSql(query, []);
-    for (let i = 0; i < res.rows.length; i++) {
-      console.log(JSON.stringify(res.rows.item(i)));
-    }
-    return res;
+
+    const words: String[] = this.extractQueryResults(res).map(val => val.word);
+    return Promise.all(words.map(word => this.find(word)));
   }
 
   executeSql(query, args = []) {
@@ -108,5 +106,13 @@ export class DatabaseProvider {
 
   ready(): Observable<boolean> {
     return this.databaseReady.asObservable();
+  }
+
+  private extractQueryResults(res): any[] {
+    const items = [];
+    for (let i = 0; i < res.rows.length; i++) {
+      items.push(res.rows.item(i));
+    }
+    return items;
   }
 }

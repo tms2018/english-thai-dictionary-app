@@ -54,9 +54,9 @@ export class HomePage {
       .ready()
       .skipWhile(val => !val)
       .subscribe(_ => {
-        // Observable.fromPromise(this.db.fts(word)).subscribe(
-        //   matches => (this.words = matches)
-        // );
+        Observable.fromPromise(this.db.fts(word)).subscribe(matches => {
+          this.words = matches.filter(val => val !== null);
+        });
       });
   }
 }
