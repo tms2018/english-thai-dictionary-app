@@ -1,7 +1,9 @@
 <ion-content>
+  <ion-item>
+    <ion-textarea autofocus #textarea></ion-textarea>
+  </ion-item>
   <button ion-button full color="primary" icon-end (click)="find(textarea.value)">
-    Search
+    Go
     <ion-icon name="search"></ion-icon>
   </button>
-  <textarea #textarea></textarea>
 </ion-content>
