@@ -16,18 +16,9 @@ export class HomePage {
   }
 
   find(word) {
+    this.words = [];
     this.db.fts(word).subscribe(res => {
-      res.then(matches => {
-        this.words = flattenDeep(matches.filter(val => val !== null));
-      });
+      this.words = res;
     });
   }
-}
-
-function flattenDeep(arr1) {
-  return arr1.reduce(
-    (acc, val) =>
-      Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val),
-    []
-  );
 }

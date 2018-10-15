@@ -1,4 +1,3 @@
-// TODO: move flattening of arrays into the database provider
 // TODO: replace placeholder html with message box to input search text
 // TODO: display loading spinner while searching for words
 // TODO: pass search results to the home screen to display
@@ -19,19 +18,10 @@ export class SearchPage {
   }
 
   find(text) {
+    this.words = [];
     const words: String[] = text.split(" ");
     this.db.findAll(words).subscribe(res => {
-      res.then(matches => {
-        this.words = flattenDeep(matches);
-      });
+      this.words = res;
     });
   }
-}
-
-function flattenDeep(arr1) {
-  return arr1.reduce(
-    (acc, val) =>
-      Array.isArray(val) ? acc.concat(flattenDeep(val)) : acc.concat(val),
-    []
-  );
 }

@@ -1,9 +1,7 @@
-// import { HttpClient } from "@angular/common/http";
 import { Platform } from "ionic-angular";
 import { Injectable } from "@angular/core";
 import { SQLite, SQLiteObject } from "@ionic-native/sqlite";
 import { BehaviorSubject, Observable } from "rxjs/Rx";
-import "rxjs/add/operator/skipWhile";
 
 function errorHandler(e) {
   console.error(JSON.stringify(e, Object.getOwnPropertyNames(e)));
@@ -57,14 +55,15 @@ export class DatabaseProvider {
     });
   }
 
-  async find(toFind): Promise<Word[]> {
+  // TODO: return a value to indicate not found so not found words can be displayed
+  async find(toFind: String): Promise<Word[]> {
     const wordRes = await this.database.executeSql(
       "SELECT * FROM words WHERE word = ?;",
       [toFind]
     );
     if (wordRes.rows.length === 0) return null;
 
-    const allWords = this.extractQueryResults(wordRes);
+    const allWords: WordRecord[] = extractQueryResults(wordRes);
 
     return Promise.all(
       allWords.map(async word => {
@@ -76,22 +75,23 @@ export class DatabaseProvider {
         const val = {
           word: word.word,
           pos: word.pos,
-          definitions: this.extractQueryResults(defRes)
+          definitions: extractQueryResults(defRes)
         };
         return val;
       })
     );
   }
 
-  findAll(toFind: String[]): Observable<Promise<Word[][]>> {
+  findAll(toFind: String[]): any {
     const uniqueWords = Array.from(new Set(toFind));
 
-    return this.ready().map(_ => {
-      return Promise.all(uniqueWords.map(word => this.find(word)));
-    });
+    return this.ready()
+      .switchMap(_ => Observable.of(...uniqueWords))
+      .flatMap(word => this.find(word))
+      .scan((accumulator, current) => accumulator.concat(current));
   }
 
-  fts(toFind: String): Observable<Promise<Word[][]>> {
+  fts(toFind: String): any {
     const query = `
       SELECT DISTINCT *
       FROM english_fts
@@ -101,26 +101,28 @@ export class DatabaseProvider {
       LIMIT 20
     `;
 
-    return this.ready().map(async _ => {
-      const res = await this.database.executeSql(query, [`^${toFind}*`]);
-      let words: String[] = this.extractQueryResults(res).map(val => val.word);
-      return Promise.all(words.map(word => this.find(word)));
-    });
-  }
-
-  executeSql(query, args = []) {
-    return this.database.executeSql(query, args);
+    return this.ready()
+      .switchMap(_ =>
+        Observable.fromPromise(this.database.executeSql(query, [`^${toFind}*`]))
+      )
+      .switchMap(queryRes =>
+        Observable.of(
+          ...extractQueryResults(queryRes).map((val): String => val.word)
+        )
+      )
+      .flatMap(val => Observable.fromPromise(this.find(val)))
+      .scan((accumulator, current) => accumulator.concat(current));
   }
 
   ready(): Observable<boolean> {
     return this.databaseReady.asObservable().skipWhile(isReady => !isReady);
   }
+}
 
-  private extractQueryResults(res): any[] {
-    const items = [];
-    for (let i = 0; i < res.rows.length; i++) {
-      items.push(res.rows.item(i));
-    }
-    return items;
+function extractQueryResults(res): any[] {
+  const items = [];
+  for (let i = 0; i < res.rows.length; i++) {
+    items.push(res.rows.item(i));
   }
+  return items;
 }
