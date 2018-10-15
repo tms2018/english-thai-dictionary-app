@@ -14,14 +14,15 @@ export class SearchPage {
   words: Word[] = [];
 
   constructor(public navCtrl: NavController, public db: DatabaseProvider) {
-    this.find("I love you");
+    this.find("I love you!");
   }
 
   find(text) {
     this.words = [];
     const words: String[] = text.split(" ");
     this.db.findAll(words).subscribe(res => {
-      this.words = res;
+      if (res.notFound) console.log(`Not Found: ${res.notFound}`);
+      this.words.push(res);
     });
   }
 }

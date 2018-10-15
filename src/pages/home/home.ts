@@ -18,7 +18,7 @@ export class HomePage {
   find(word) {
     this.words = [];
     this.db.fts(word).subscribe(res => {
-      this.words = res;
+      this.words.push(res);
     });
   }
 }
