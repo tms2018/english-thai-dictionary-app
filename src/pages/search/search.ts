@@ -1,28 +1,24 @@
-// TODO: replace placeholder html with message box to input search text
+// TODO: remove punctuation from search terms
 // TODO: display loading spinner while searching for words
-// TODO: pass search results to the home screen to display
+// TODO: convert plural words to singular
 
 import { Component } from "@angular/core";
 import { NavController } from "ionic-angular";
-import { DatabaseProvider, Word } from "../../providers/database/database";
+import { HomePage } from '../home/home';
 
 @Component({
   selector: "page-search",
   templateUrl: "search.html"
 })
 export class SearchPage {
-  words: Word[] = [];
-
-  constructor(public navCtrl: NavController, public db: DatabaseProvider) {
-    this.find("I love you!");
+  constructor(public navCtrl: NavController) {
   }
 
   find(text) {
-    this.words = [];
-    const words: String[] = text.split(" ");
-    this.db.findAll(words).subscribe(res => {
-      if (res.notFound) console.log(`Not Found: ${res.notFound}`);
-      this.words.push(res);
-    });
+    if (text === '') return;
+
+    const words: String[] = text.split(/\s+/);
+
+    this.navCtrl.setRoot(HomePage, { words });
   }
 }
