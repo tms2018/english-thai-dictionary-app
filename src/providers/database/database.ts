@@ -61,7 +61,7 @@ export class DatabaseProvider {
 
   find(toFind: String): Observable<Word | WordNotFound> {
     return Observable
-      .fromPromise(this.database.executeSql("SELECT * FROM words WHERE word = ?;", [toFind]))
+      .fromPromise(this.database.executeSql("SELECT * FROM words WHERE word = ? COLLATE NOCASE", [toFind]))
       .switchMap((wordRes): Observable<Word | WordNotFound> => {
         if (wordRes.rows.length === 0) {
           return Observable.of({ notFound: toFind });
@@ -85,7 +85,7 @@ export class DatabaseProvider {
   }
 
   findAll(toFind: String[]): Observable<Word | WordNotFound> {
-    const uniqueWords = Array.from(new Set(toFind));
+    const uniqueWords = Array.from(new Set(toFind.map(word => word.toLowerCase())));
 
     return this.ready()
       .switchMap(_ => Observable.of(...uniqueWords))
