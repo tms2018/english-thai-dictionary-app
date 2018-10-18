@@ -1,23 +1,18 @@
 <ion-header>
-  <!-- <ion-navbar>
-    <ion-title>Home</ion-title>
-  </ion-navbar> -->
-  <ion-item>
-    <ion-label fixed>Search</ion-label>
-    <ion-input type="text" (change)="find($event.target.value)"></ion-input>
-  </ion-item>
+  <ion-navbar color="secondary">
+    <ion-title>Dictionary</ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="navToDocumentSearchPage()">
+        <ion-icon name="search"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-
+  <ion-searchbar (ionInput)="find($event.target.value)"></ion-searchbar>
+  <!-- show unfound words here -->
   <ion-list *ngIf="words.length > 0">
-    <ion-item-group *ngFor="let word of words">
-      <ion-item-divider color="light"><b>{{ word.word }}</b> <small>{{ word.pos }}</small></ion-item-divider>
-      <ion-item text-wrap *ngFor="let definition of word.definitions">
-        <p *ngIf="definition.translation != ''"><b>{{ definition.translation }}</b></p>
-        <p *ngIf="definition.definition != ''">{{ definition.definition }}</p>
-        <p *ngIf="definition.example != ''"><em>{{ definition.example }}</em></p>
-      </ion-item>
-    </ion-item-group>
+    <collapsible-card *ngFor="let word of words" [word]="word"></collapsible-card>
   </ion-list>
 </ion-content>

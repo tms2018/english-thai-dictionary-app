@@ -1,0 +1,26 @@
+<!-- Generated template for the CollapsibleSegmentComponent component -->
+<!-- <ion-item-group>
+  <ion-item-divider color="secondary" (click)="toggleHidden()" icon-end>
+    <b>{{ word.word }}</b> <small>{{ word.pos }}</small>
+  </ion-item-divider>
+  <ion-item text-wrap *ngFor="let definition of word.definitions">
+    <p *ngIf="definition.translation != ''"><b>{{ definition.translation }}</b></p>
+    <p *ngIf="definition.definition != ''">{{ definition.definition }}</p>
+    <p *ngIf="definition.example != ''"><em>{{ definition.example }}</em></p>
+  </ion-item>
+</ion-item-group> -->
+
+<ion-card>
+  <ion-card-header color="white" (click)="toggleHidden()">
+    <b>{{ word.word }}</b> <small>{{ word.pos }}</small>
+  </ion-card-header>
+  <ion-card-content *ngIf="isVisible">
+    <ion-list>
+      <ion-item color="white" text-wrap *ngFor="let definition of word.definitions">
+        <p *ngIf="definition.translation != ''"><b>{{ definition.translation }}</b></p>
+        <p *ngIf="definition.definition != ''">{{ definition.definition }}</p>
+        <p *ngIf="definition.example != ''"><em>{{ definition.example }}</em></p>
+      </ion-item>
+    </ion-list>
+  </ion-card-content>
+</ion-card>

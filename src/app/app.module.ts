@@ -5,7 +5,8 @@ import { MyApp } from "./app.component";
 
 import { SearchPage } from "../pages/search/search";
 import { HomePage } from "../pages/home/home";
-import { TabsPage } from "../pages/tabs/tabs";
+
+import { CollapsibleCardComponent } from '../components/collapsible-card/collapsible-card';
 
 import { StatusBar } from "@ionic-native/status-bar";
 import { SplashScreen } from "@ionic-native/splash-screen";
@@ -14,10 +15,10 @@ import { SQLite } from "@ionic-native/sqlite";
 import { DatabaseProvider } from "../providers/database/database";
 
 @NgModule({
-  declarations: [MyApp, SearchPage, HomePage, TabsPage],
+  declarations: [MyApp, SearchPage, HomePage, CollapsibleCardComponent],
   imports: [BrowserModule, IonicModule.forRoot(MyApp)],
   bootstrap: [IonicApp],
-  entryComponents: [MyApp, SearchPage, HomePage, TabsPage],
+  entryComponents: [MyApp, SearchPage, HomePage],
   providers: [
     StatusBar,
     SplashScreen,
@@ -26,4 +27,4 @@ import { DatabaseProvider } from "../providers/database/database";
     DatabaseProvider
   ]
 })
-export class AppModule {}
+export class AppModule { }
