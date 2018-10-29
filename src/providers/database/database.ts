@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Platform } from "ionic-angular";
 import { Injectable } from "@angular/core";
 import { SQLite, SQLiteObject } from "@ionic-native/sqlite";
@@ -59,40 +60,50 @@ export class DatabaseProvider {
     });
   }
 
-  find(toFind: String): Observable<Word | WordNotFound> {
+  find(toFind: String): Observable<(Word | WordNotFound)[]> {
     return Observable
-      .fromPromise(this.database.executeSql("SELECT * FROM words WHERE word = ? COLLATE NOCASE", [toFind]))
-      .switchMap((wordRes): Observable<Word | WordNotFound> => {
+      .fromPromise(this.database.executeSql("SELECT * FROM words WHERE word = ?", [toFind]))
+      .switchMap((wordRes): Observable<(Word | WordNotFound)[]> => {
         if (wordRes.rows.length === 0) {
-          return Observable.of({ notFound: toFind });
+          return Observable.of([{ notFound: toFind }]);
         }
 
         return Observable
-          .of(...extractQueryResults(wordRes))
-          .flatMap(({ word, pos, word_id }: WordRecord): Observable<Word> => {
+          .of(extractQueryResults(wordRes))
+          .switchMap((wordRecords: WordRecord[]): Observable<Word[]> => {
             return Observable
-              .fromPromise(
-                this.database.executeSql(
-                  "SELECT definition, translation, example FROM definitions WHERE word_id = ?",
-                  [word_id])
-              )
-              .switchMap((defRes): Observable<Definition[]> => {
-                return Observable.of(extractQueryResults(defRes))
+              .fromPromise(Promise.all(
+                wordRecords.map(({ word_id }) =>
+                  this.database.executeSql(
+                    "SELECT definition, translation, example FROM definitions WHERE word_id = ?",
+                    [word_id])
+                )
+              ))
+              .map((defRecords) => {
+                return defRecords.map(defRecord => extractQueryResults(defRecord))
               })
-              .map(definitions => ({ word, pos, definitions }));
+              .map((defs: Definition[][]) => {
+                const words: Word[] = [];
+                for (let i = 0; i < wordRecords.length; i++) {
+                  const { word, pos } = wordRecords[i];
+                  const definitions = defs[i];
+                  words.push({ word, pos, definitions });
+                }
+                return words
+              });
           });
       });
   }
 
-  findAll(toFind: String[]): Observable<Word | WordNotFound> {
+  findAll(toFind: String[]) {
     const uniqueWords = Array.from(new Set(toFind.map(word => word.toLowerCase())));
 
     return this.ready()
-      .switchMap(_ => Observable.of(...uniqueWords))
-      .flatMap(word => this.find(word));
+      .switchMap(_ => Promise.all(uniqueWords.map(word => this.find(word).toPromise())))
+      .map((words => words.reduce((acc, val) => acc.concat(val), [])));
   }
 
-  fts(toFind: String): Observable<Word> {
+  fts(toFind: String): Observable<Word[]> {
     const query = `
       SELECT DISTINCT *
       FROM english_fts
@@ -100,19 +111,17 @@ export class DatabaseProvider {
       MATCH ?
       ORDER BY rank
       LIMIT 20
+      OFFSET 0
     `;
 
-    return <Observable<Word>> // the full text search guarantees words that are in the db
+    return <Observable<Word[]>> // the full text search guarantees words that are in the db
       this.ready()
         .switchMap(_ =>
           Observable.fromPromise(this.database.executeSql(query, [`^${toFind}*`]))
         )
-        .switchMap(queryRes =>
-          Observable.of(
-            ...extractQueryResults(queryRes).map((val): String => val.word)
-          )
-        )
-        .flatMap(val => this.find(val));
+        .map(queryRes => extractQueryResults(queryRes).map((val): String => val.word))
+        .switchMap(uniqueWords => Promise.all(uniqueWords.map(word => this.find(word).toPromise())))
+        .map((words => words.reduce((acc, val) => acc.concat(val), [])));
   }
 
   ready(): Observable<boolean> {

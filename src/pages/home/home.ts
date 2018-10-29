@@ -30,10 +30,9 @@ export class HomePage {
     word = this.nlp.tokenize(word).join(' ').trim();
     if (word === '') return;
 
-    this.words = [];
-    this.notFound = [];
     this.db.fts(word).subscribe(res => {
-      this.words.push(res);
+      this.words = res;
+      this.notFound = [];
     });
   }
 
@@ -41,15 +40,11 @@ export class HomePage {
     const words: String[] = this.navParams.get('words');
     if (!words) return;
 
-    this.words = [];
-    this.notFound = [];
-    this.db.findAll(words).subscribe(res => {
-      if (res.hasOwnProperty('notFound')) {
-        this.notFound.push((<WordNotFound>res).notFound);
-      }
-      else {
-        this.words.push(<Word>res);
-      }
+    this.db.findAll(words).subscribe(results => {
+      this.words = <Word[]>results.filter(word => !word.hasOwnProperty('notFound'));
+      this.notFound = results
+        .filter(word => word.hasOwnProperty('notFound'))
+        .map(({ notFound }: WordNotFound) => notFound)
     });
 
   }
