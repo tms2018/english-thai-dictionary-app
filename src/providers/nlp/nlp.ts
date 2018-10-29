@@ -15,10 +15,13 @@ export class NlpProvider {
   }
 
   tokenize(phrase: String) {
-    return phrase.split(/[^A-Za-z]+/);
+    return phrase.split(/[^A-Za-z]+/)
+      .filter(token => token !== '')
+
   }
 
   tokenizeAndStem(phrase: String): String[] {
-    return this.tokenize(phrase).map(word => this.stem(word));
+    return this.tokenize(phrase)
+      .map(word => this.stem(word));
   }
 }
