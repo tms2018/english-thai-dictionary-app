@@ -13,6 +13,7 @@ import { SplashScreen } from "@ionic-native/splash-screen";
 
 import { SQLite } from "@ionic-native/sqlite";
 import { DatabaseProvider } from "../providers/database/database";
+import { NlpProvider } from '../providers/nlp/nlp';
 
 @NgModule({
   declarations: [MyApp, SearchPage, HomePage, CollapsibleCardComponent],
@@ -24,7 +25,8 @@ import { DatabaseProvider } from "../providers/database/database";
     SplashScreen,
     SQLite,
     { provide: ErrorHandler, useClass: IonicErrorHandler },
-    DatabaseProvider
+    DatabaseProvider,
+    NlpProvider
   ]
 })
 export class AppModule { }

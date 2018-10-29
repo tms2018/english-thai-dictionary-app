@@ -1,6 +1,8 @@
 import { Component } from "@angular/core";
-import { NavParams } from "ionic-angular";
-import { DatabaseProvider, Word } from "../../providers/database/database";
+import { NavParams, NavController } from "ionic-angular";
+import { DatabaseProvider, Word, WordNotFound } from "../../providers/database/database";
+import { NlpProvider } from '../../providers/nlp/nlp';
+import { SearchPage } from '../search/search';
 
 @Component({
   selector: "page-home",
@@ -8,17 +10,28 @@ import { DatabaseProvider, Word } from "../../providers/database/database";
 })
 export class HomePage {
   words: Word[] = [];
+  notFound: String[] = [];
 
   constructor(
     private db: DatabaseProvider,
-    private navParams: NavParams) {
+    private nlp: NlpProvider,
+    private navParams: NavParams,
+    private navCtrl: NavController) {
+  }
+
+  navToDocumentSearchPage() {
+    this.navCtrl.push(SearchPage);
   }
 
   find(word: String) {
-    word = word.trim();
+    if (!word) return;
+
+    // remove punctuation and numbers
+    word = this.nlp.tokenize(word).join(' ').trim();
     if (word === '') return;
 
     this.words = [];
+    this.notFound = [];
     this.db.fts(word).subscribe(res => {
       this.words.push(res);
     });
@@ -29,10 +42,10 @@ export class HomePage {
     if (!words) return;
 
     this.words = [];
+    this.notFound = [];
     this.db.findAll(words).subscribe(res => {
       if (res.hasOwnProperty('notFound')) {
-        // TODO: create another list of unfound words and display on the page
-        console.log(`Not Found: ${res['notFound']}`);
+        this.notFound.push((<WordNotFound>res).notFound);
       }
       else {
         this.words.push(<Word>res);
