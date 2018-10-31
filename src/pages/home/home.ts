@@ -1,8 +1,6 @@
 import { Component } from "@angular/core";
-import { NavParams, NavController } from "ionic-angular";
 import { DatabaseProvider, Word, WordNotFound } from "../../providers/database/database";
 import { NlpProvider } from '../../providers/nlp/nlp';
-import { SearchPage } from '../search/search';
 
 @Component({
   selector: "page-home",
@@ -11,19 +9,14 @@ import { SearchPage } from '../search/search';
 export class HomePage {
   words: Word[] = [];
   notFound: String[] = [];
+  searchType: String = 'fts';
 
   constructor(
     private db: DatabaseProvider,
-    private nlp: NlpProvider,
-    private navParams: NavParams,
-    private navCtrl: NavController) {
+    private nlp: NlpProvider) {
   }
 
-  navToDocumentSearchPage() {
-    this.navCtrl.push(SearchPage);
-  }
-
-  find(word: String) {
+  fts(word: String) {
     if (!word) return;
 
     // remove punctuation and numbers
@@ -36,8 +29,8 @@ export class HomePage {
     });
   }
 
-  ionViewDidEnter() {
-    const words: String[] = this.navParams.get('words');
+  find(text: String) {
+    const words: String[] = this.nlp.tokenize(text);
     if (!words) return;
 
     this.db.findAll(words).subscribe(results => {

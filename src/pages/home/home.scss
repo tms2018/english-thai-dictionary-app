@@ -1,3 +1,15 @@
 page-home {
+  ion-textarea {
+    background-color: white;
+  }
 
+
+  ion-input {
+    box-shadow: 1px 1px 3px black;    
+    background: white;
+  }
+
+  .flex-row {
+    display: flex;
+  }
 }

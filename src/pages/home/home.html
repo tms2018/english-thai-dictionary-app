@@ -1,16 +1,47 @@
 <ion-header>
   <ion-navbar color="secondary">
-    <ion-title>Dictionary</ion-title>
-    <ion-buttons end>
-      <button ion-button icon-only (click)="navToDocumentSearchPage()">
-        <ion-icon name="search"></ion-icon>
-      </button>
-    </ion-buttons>
+    <ion-title text-center>Dictionary</ion-title>
   </ion-navbar>
+  <ion-toolbar no-border-top>
+    <ion-segment [(ngModel)]="searchType" color="secondary">
+      <!-- <ion-segment-button value="word-search">
+        <ion-icon color="white" name="book"></ion-icon>
+      </ion-segment-button> -->
+      <ion-segment-button value="fts">
+        <ion-icon color="primary" name="search"></ion-icon>
+      </ion-segment-button>
+      <ion-segment-button value="document-search">
+        <ion-icon color="primary" name="paper"></ion-icon>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
-  <ion-searchbar (ionInput)="find($event.target.value)"></ion-searchbar>
+<ion-content [ngSwitch]="searchType">
+
+  <!-- <div *ngSwitchCase="'word-search'" class="flex-row" padding>
+    <ion-item begin>
+      <ion-input #wordsearch clearInput></ion-input>
+    </ion-item>
+    <button ion-button color="primary" (click)="find(wordsearch.value)">
+      <ion-icon name="search"></ion-icon>
+    </button>
+  </div> -->
+
+  <div *ngSwitchCase="'fts'">
+    <ion-searchbar clearInput (ionInput)="fts($event.target.value)"></ion-searchbar>
+  </div>
+
+  <div *ngSwitchCase="'document-search'">
+    <ion-item padding-top padding-right padding-left>
+      <ion-textarea #documentsearch></ion-textarea>
+    </ion-item>
+    <ion-item>
+      <button ion-button block color="primary" icon-end (click)="find(documentsearch.value)">
+        <ion-icon name="search"></ion-icon>
+      </button>
+    </ion-item>
+  </div>
   <!-- show unfound words here -->
   <ion-list *ngIf="words.length > 0">
     <collapsible-card *ngFor="let word of words" [word]="word"></collapsible-card>

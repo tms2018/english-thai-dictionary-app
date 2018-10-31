@@ -3,7 +3,6 @@ import { BrowserModule } from "@angular/platform-browser";
 import { IonicApp, IonicModule, IonicErrorHandler } from "ionic-angular";
 import { MyApp } from "./app.component";
 
-import { SearchPage } from "../pages/search/search";
 import { HomePage } from "../pages/home/home";
 
 import { CollapsibleCardComponent } from '../components/collapsible-card/collapsible-card';
@@ -16,10 +15,10 @@ import { DatabaseProvider } from "../providers/database/database";
 import { NlpProvider } from '../providers/nlp/nlp';
 
 @NgModule({
-  declarations: [MyApp, SearchPage, HomePage, CollapsibleCardComponent],
+  declarations: [MyApp, HomePage, CollapsibleCardComponent],
   imports: [BrowserModule, IonicModule.forRoot(MyApp)],
   bootstrap: [IonicApp],
-  entryComponents: [MyApp, SearchPage, HomePage],
+  entryComponents: [MyApp, HomePage],
   providers: [
     StatusBar,
     SplashScreen,
