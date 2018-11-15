@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Platform } from "ionic-angular";
 import { Injectable } from "@angular/core";
 import { SQLite, SQLiteObject } from "@ionic-native/sqlite";

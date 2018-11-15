@@ -14,7 +14,7 @@ export class NlpProvider {
     return tagged.lemma || tagged.value;
   }
 
-  tokenize(phrase: String) {
+  tokenize(phrase: String): String[] {
     return phrase.split(/[^A-Za-z]+/)
       .filter(token => token !== '')
 
