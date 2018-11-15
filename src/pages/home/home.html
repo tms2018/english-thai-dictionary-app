@@ -30,6 +30,9 @@
 
   <div *ngSwitchCase="'fts'">
     <ion-searchbar clearInput (ionInput)="fts($event.target.value)"></ion-searchbar>
+    <div *ngIf="isLoading" class="spinner__large">
+      <ion-spinner color="primary"></ion-spinner>
+    </div>
   </div>
 
   <div *ngSwitchCase="'document-search'">
@@ -38,7 +41,8 @@
     </ion-item>
     <ion-item>
       <button ion-button block color="primary" icon-end (click)="find(documentsearch.value)">
-        <ion-icon name="search"></ion-icon>
+        <ion-icon *ngIf="!isLoading" name="search"></ion-icon>
+        <ion-spinner *ngIf="isLoading" color="white"></ion-spinner>
       </button>
     </ion-item>
   </div>
